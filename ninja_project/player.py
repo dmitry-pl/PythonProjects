@@ -8,7 +8,7 @@ class Player:
         self.speed = 5
         self.health = 100
         self.max_health = 100
-        self.mana = 0
+        self.mana = 50
         self.attack_damage = 20
         self.shadow_clone_cooldown = 0
         self.level = 1

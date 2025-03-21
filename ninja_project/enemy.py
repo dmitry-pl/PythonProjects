@@ -39,11 +39,25 @@ class Enemy:
         # Используем A* для поиска пути к игроку
         start = (self.x // 40, self.y // 40)
         goal = (player.x // 40, player.y // 40)
-        path = a_star_search(self.grid, start, goal)
-        if path:
-            next_step = path[0]
+        came_from, _ = a_star_search(self.grid, start, goal)
+
+        # Восстанавливаем путь
+        path = self.reconstruct_path(came_from, start, goal)
+        if path and len(path) > 1:
+            next_step = path[1]  # Первый шаг после текущей позиции
             self.x = next_step[0] * 40
             self.y = next_step[1] * 40
+
+    def reconstruct_path(self, came_from, start, goal):
+        # Восстанавливаем путь от цели к началу
+        path = []
+        current = goal
+        while current != start:
+            path.append(current)
+            current = came_from[current]
+        path.append(start)
+        path.reverse()  # Переворачиваем путь, чтобы он шёл от начала к цели
+        return path
 
     def attack(self, player):
         player.take_damage(self.damage)
