@@ -31,10 +31,10 @@ class Player:
             self.attack(enemies)
 
         # Проверка на создание теневого клона
-        if keys[pygame.K_SPACE] and self.mana >= 50 and self.shadow_clone_cooldown <= 0:
+        if keys[pygame.K_SPACE]:# and self.mana >= 50 and self.shadow_clone_cooldown <= 0:
             self.mana -= 50
             self.shadow_clone_cooldown = 300  # Время перезарядки
-            return ShadowClone(self.x, self.y, self.attack_damage // 2)
+            return ShadowClone(self.x + 10, self.y + 10, self.attack_damage // 2)
         return None
 
     def attack(self, enemies):
