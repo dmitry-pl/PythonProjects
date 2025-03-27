@@ -29,7 +29,9 @@ not_col = ["floor", "grass"]
 washer = pygame.transform.scale(pygame.image.load("images/washer.png"), (50, 50))
 special = pygame.transform.scale(pygame.image.load("images/special.png"), (50, 50))
 damage_img = pygame.transform.scale(pygame.image.load('images/damage_img.png'), (1500, 1000))
-damage_img.set_alpha(90)
+main_server = pygame.transform.scale(pygame.image.load("images/main_server.png"), (50, 50))
+lighting = pygame.transform.scale(pygame.image.load("images/lighting.png"), (50, 50))
+
 
 
 
@@ -419,67 +421,16 @@ class Enemy(pygame.sprite.Sprite):
             dis.blit(damage_img, (0,0))
 
 
-        #if self.find_player and not self.died:
-        self.recalculate_counter += 1
-        
-        # Перерасчет пути не каждый кадр для оптимизации
-        if self.recalculate_counter >= 20 or not self.path:
-            self.recalculate_counter = 0
-            self.path = self.pathfinder.find_path(
-                (self.rect.centerx, self.rect.centery),
-                (player.rect.centerx, player.rect.centery)
-            )
-        
-        if self.path:
-            # Движение по пути
-            next_node = self.path[0]
-            target_x = next_node[0] * self.pathfinder.grid_size + self.pathfinder.grid_size // 2
-            target_y = next_node[1] * self.pathfinder.grid_size + self.pathfinder.grid_size // 2
-            
-            dx = target_x - self.rect.centerx
-            dy = target_y - self.rect.centery
-            distance = math.hypot(dx, dy)
-            
-            if distance < 5:  # Достигли узла пути
-                if len(self.path) > 1:
-                    self.path.pop(0)
-            else:
-                if distance > 0:
-                    dx = dx / distance
-                    dy = dy / distance
-                
-                # Избегание других врагов
-                for enemy in enemy_group:
-                    if enemy != self:
-                        enemy_dist = math.hypot(enemy.rect.centerx - self.rect.centerx, 
-                                              enemy.rect.centery - self.rect.centery)
-                        if enemy_dist < self.avoid_radius:
-                            avoid_dx = self.rect.centerx - enemy.rect.centerx
-                            avoid_dy = self.rect.centery - enemy.rect.centery
-                            if enemy_dist > 0:
-                                avoid_dx = avoid_dx / enemy_dist * (self.avoid_radius - enemy_dist) / self.avoid_radius
-                                avoid_dy = avoid_dy / enemy_dist * (self.avoid_radius - enemy_dist) / self.avoid_radius
-                            dx += avoid_dx * 0.5
-                            dy += avoid_dy * 0.5
-                
-                # Нормализация вектора движения
-                if math.hypot(dx, dy) > 0:
-                    dx = dx / math.hypot(dx, dy)
-                    dy = dy / math.hypot(dx, dy)
-                
-                old_x, old_y = self.rect.x, self.rect.y
-                self.rect.x += dx * self.speed
-                self.rect.y += dy * self.speed
-                
-                # Проверка столкновений со стенами
-                if pygame.sprite.spritecollide(self, walls, False):
-                    self.rect.x, self.rect.y = old_x, old_y
-                    self.path = []  # При столкновении пересчитываем путь
+        if self.find_player and not self.died:
+            if player.rect.x > self.rect.x:
+                self.rect.x += self.speed
+            if player.rect.x < self.rect.x:
+                self.rect.x -= self.speed
+
 
 
         dis.blit(self.image, cam.apply(self))
 
-        
         
         
 
@@ -550,12 +501,15 @@ class Map_class1():
         self.level_2 = level2
 
         self.level_3 = level3
+        self.level_4 = level4
 
     def draw_map(self, group):
         y = 0
         x = 0
         for line in self.map_r:
             for s in line:
+                if s == "11":
+                    floor_list.add(Floor(x, y))
                 if s == "1":
                     group.add(Wall("wall", x, y))
                 
@@ -579,6 +533,10 @@ class Map_class1():
                     group.add(Wall("washer", x, y))
                 if s == "8":
                     group.add(Wall("special", x, y))
+                if s == "10":
+                    group.add(Wall("main_server", x, y))
+                
+
 
                 
                 x += 50
@@ -590,6 +548,8 @@ class Map_class1():
         self.map_r = self.level_2
     def change3(self):
         self.map_r = self.level_3
+    def change4(self):
+        self.map_r = self.level_4
 
 
 class Wall(pygame.sprite.Sprite):
@@ -612,6 +572,11 @@ class Wall(pygame.sprite.Sprite):
             self.img = washer
         elif typew == "special":
             self.img = special
+        elif typew == "main_server":
+            self.img = main_server
+        elif typew == "lighting":
+            self.img = lighting
+        
 
 
         
