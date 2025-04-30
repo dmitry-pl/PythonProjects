@@ -1,8 +1,9 @@
 import heapq
+import random
+import pygame
 from typing import List, Tuple, Dict
 
 SCREEN_SIZE = (1500, 1000)
-
 
 class Pathfinder:
     def __init__(self, walls, grid_size=50):
@@ -86,3 +87,24 @@ class Pathfinder:
             path.append(current)
         path.reverse()
         return path
+    
+    def get_random_free_position(self, walls) -> Tuple[int, int]:
+        """Генерирует случайную свободную позицию на карте"""
+        max_attempts = 100
+        for _ in range(max_attempts):
+            x = random.randint(0, SCREEN_SIZE[0] - 50)
+            y = random.randint(0, SCREEN_SIZE[1] - 50)
+            
+            # Проверяем, что позиция свободна от стен
+            temp_rect = pygame.Rect(x, y, 50, 50)
+            collision = False
+            for wall in walls:
+                if temp_rect.colliderect(wall.rect):
+                    collision = True
+                    break
+                    
+            if not collision:
+                return (x, y)
+    
+        # Если не удалось найти свободную позицию
+        return (100, 100)    
